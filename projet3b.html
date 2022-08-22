@@ -1,0 +1,47 @@
+<!doctype html>
+    <html lang="fr">
+        <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Première app Vue</title>
+            <link rel="stylesheet" href="">
+            <style>
+                [v-cloak2] {
+                    display: none;
+                }
+            </style>
+            
+        </head>
+        <body>
+            <div id="app" v-cloak>
+                <section>
+                  <img :src="imgActive" alt="essai" @click="updateUrl">
+                  <p>{{ texteBrut }}</p>
+                  <p v-html="texteHtml"></p>
+                </section>
+            </div>
+            <script src="https://unpkg.com/vue@next"></script>
+            <script>
+              const { ref } = Vue
+              const app = Vue.createApp({
+                  setup() { 
+                      //DATA
+                     let urlImg1 = ref("https://picsum.photos/id/238/200/300")                   
+                     let urlImg2 = ref("https://picsum.photos/id/237/200/300")
+                     let imgActive = ref(urlImg1.value)
+                     let texteBrut =  ref("Vue c'est facile")
+                     let texteHtml = ref("<strong>Vue</strong> c'est facile")
+                    
+                    //Method
+                    const updateUrl = () => {
+                      imgActive.value = (imgActive.value == urlImg1.value) ? urlImg2.value : urlImg1.value
+                    }
+                    return {urlImg1, urlImg2, imgActive, texteBrut, texteHtml, updateUrl}
+                  }
+                });
+                  const vm = app.mount('#app')
+                
+          </script>
+        </body>
+    </html>

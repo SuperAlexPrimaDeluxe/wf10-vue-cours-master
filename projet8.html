@@ -1,0 +1,102 @@
+<!doctype html>
+    <html lang="fr">
+        <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Première app Vue</title>
+            <link rel="stylesheet" href="">
+            <style>
+                [v-cloak] {
+                    display: none;
+                }
+                .done {
+                    background-color: rgba(255,0,0,.10);
+                }
+                .task {
+                    margin-top: 5px;
+                }
+            </style>
+            
+        </head>
+        <body>
+            <div id="app" v-cloak>
+                <section v-cloak>
+                    <h1>Nouvelle tâche ?</h1>
+                    <form ref="formaddTask" action="">
+                        <input type="number" v-model.lazy.trim="newNumber.label" placeholder="label"> <!--Lazy :> empecher le rafraichissement des caractère a chque fois qu'on tape et trim pour enlever les caractère d'espace avant et après)-->
+                        <button @click.prevent="addItem('+')" class="plus">+</button>
+                        <button @click.prevent="addItem('-')" class="moins">-</button>
+                        <button @click.prevent="addItem('x')" class="multiplie">x</button>
+                        <button @click.prevent="addItem('/')" class="divise">/</button>
+                        <hr>
+                        <p>{{total}}</p>
+                        <h2>Historique des Résultats :</h2>
+                        <ul v-if="numbers.length > 0"> <!--verifie si il y'a au moin une tache et l'affiche-->
+                            <li class="task" :key="index" :data-key="index" v-for="(task, index) in numbers">{{ task.operator }}{{ task.label }}</li>
+                        </ul>
+                        <p v-else>Liste vide</p>
+                    </form>
+                </section>
+            </div>
+            <script src="https://unpkg.com/vue@next"></script>
+            <script >
+                const { ref, watch } = Vue
+                const app = Vue.createApp({
+                    name: "Calculatrice",
+                    setup() { 
+                        let newNumber = ref ({
+                                label: "",
+                                operator: ""
+                            })
+                        numbers = ref([])
+                        total = ref(0)
+                        loading = ref(true)
+                        formaddTask = ref(null)
+                        doPlus = ref(null)
+                   
+                        const addItem = (operator) => {
+                            alert(operator);
+                            switch(operator){
+                              case '+' : 
+                                total.value += newNumber.value.label
+                                break;
+                              case '-' :  
+                                total.value -= newNumber.value.label
+                                break;
+                              case 'x' :  
+                                total.value *= newNumber.value.label
+                                break;
+                              case '/' :  
+                                total.value /= newNumber.value.label
+                                break;
+                            }
+                            newNumber.value.operator = operator
+                            numbers.value.unshift({... newNumber.value}) // ""..."Crée un nouvel objet avec les valeurs de l'objet et les propriétés "structure" newNumber
+                            formaddTask.value.reset() // equivalent au document.queryselector sur le "addtask" (LA MEGA QUEUE BORDEL)
+                            newNumber.value = {
+                                label: "",
+                                operator: ""
+                            }
+                        }
+                        
+                        watch(
+                          () => newNumber.value.label,
+                          (nouvelleValeur, ancienneValeur) => {
+                          console.log(nouvelleValeur)
+                          console.log(ancienneValeur)
+                        })
+
+                        return {newNumber, numbers, loading, formaddTask, addItem, total}
+                    },
+                    created() {  //avant le montage du DOM réel
+                        if (localStorage.numbers) {
+                            numbers.value = JSON.parse(localStorage.numbers)
+                        }
+                    },
+
+                })
+                const vm = app.mount('#app')
+            </script>
+        </body>
+    </html>

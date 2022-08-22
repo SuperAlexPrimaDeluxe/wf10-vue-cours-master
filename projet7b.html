@@ -1,0 +1,92 @@
+<!doctype html>
+    <html lang="fr">
+        <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Première app Vue</title>
+            <link rel="stylesheet" href="">
+            <style>
+                [v-cloak] {
+                    display: none;
+                }
+                .done {
+                    background-color: rgba(255,0,0,.10);
+                }
+                .task {
+                    margin-top: 5px;
+                }
+            </style>
+            
+        </head>
+        <body>
+            <div id="app" v-cloak>
+                <div class="loader" v-if="loading">loading</div>
+                <section v-cloak v-if="!loading">
+                    <h1>Nouvelle tâche ?</h1>
+                    <form ref="formaddTask" action="" @submit.prevent="addTask">
+                        <input type="text" v-model.lazy.trim="newTask.label" placeholder="label"> <!--Lazy :> empecher le rafraichissement des caractère a chque fois qu'on tape et trim pour enlever les caractère d'espace avant et après)-->
+                        <button>Enregistrer</button>
+                        <hr>
+                        <h2>Liste des tâches</h2>
+                        <ul v-if="tasks.length > 0"> <!--verifie si il y'a au moin une tache et l'affiche-->
+                            
+                            <li class="task" :class="{done: task.done}" :key="index" :data-key="index" v-for="(task, index) in tasks">{{ task.label }} <a href="#" class="doneclick" @click.prevent="changeDone(index)">V</a> <a href="#" class="delclick" @click.prevent="delTask(index)">X</a></li>
+                        </ul>
+                        <p v-else>Liste vide</p>
+                    </form>
+                </section>
+            </div>
+            <script src="https://unpkg.com/vue@next"></script>
+            <script >
+                const { ref } = Vue
+                const app = Vue.createApp({
+                    name: "App",
+                    setup() { 
+                        
+                        let newTask = ref ({
+                                label: "",
+                                done: false
+                            })
+                        tasks = ref([])
+                        loading = ref(true)
+                        formaddTask = ref(null)
+                        const updateLocalStorage = () => {
+                            localStorage.setItem("tasks", JSON.stringify(tasks.value))
+                        }
+                        const addTask = () => {
+                            tasks.value.push({... newTask.value}) // ""..."Crée un nouvel objet avec les valeurs de l'objet et les propriétés "structure" newtask
+                            updateLocalStorage() //actualise l'arrray task stocké dans le localStorage ( quand on va chercher une fonction on ajoute pas de .value)
+                            formaddTask.value.reset // equivalent au document.queryselector sur le "addtask" (LA MEGA QUEUE BORDEL)
+                            newTask.value = {
+                                label: "",
+                                done: false
+                            }
+                        }
+                        let changeDone = (index) => {
+                            //alert(index)
+                            tasks.value[index].done = !tasks.value[index].done
+                            updateLocalStorage() 
+                        }
+                        const delTask = (index) => {
+                            //alert(index)
+                            tasks.value.splice(index,1)
+                            updateLocalStorage()
+                        }
+
+                        return {newTask, tasks, loading, formaddTask, addTask, changeDone, delTask}
+                    },
+                    created() {  //avant le montage du DOM réel
+                        if (localStorage.tasks) {
+                            tasks.value = JSON.parse(localStorage.tasks)
+                        }
+                    },
+                    mounted() {
+                        loading.value = false
+                    },
+                    
+                })
+                const vm = app.mount('#app')
+            </script>
+        </body>
+    </html>
